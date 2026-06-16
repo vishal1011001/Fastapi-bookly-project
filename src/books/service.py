@@ -1,40 +1,45 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select, desc
 from src.books.schemas import BookModel, BookCreateModel, BookUpdateModel
-
+from src.books.models import Book
 
 class BookService:
-    def get_all_books(self, session:AsyncSession):
-        statement = select(BookModel).order_by(desc(BookModel.created_at))
+    async def get_all_books(self, session:AsyncSession):
+        statement = select(Book).order_by(desc(Book.created_at))
         result = await session.exec(statement)
-        return result.all()
+        return result.all() if result is not None else None
     
-    def get_a_book(self, book_id:str, session:AsyncSession):
-        statement = select(BookModel).where(BookModel.uid == book_id)
+    async def get_a_book(self, book_uid:str, session:AsyncSession):
+        statement = select(Book).where(Book.uid == book_uid)
         result = await session.exec(statement)
-        return result.first()
+        return result.first() if result is not None else None
     
-    def create_book(self, book_data:BookCreateModel, session:AsyncSession):
+    async def create_book(self, book_data:BookCreateModel, session:AsyncSession):
         book_data_dict = book_data.model_dump()
-        await session.add(book_data_dict)
+        book = Book(**book_data_dict)
+        session.add(book)
         await session.commit()
         return book_data_dict
     
-    def update_book(self, book_id:str, book_update_data:BookUpdateModel, session:AsyncSession):
-        book_to_update = self.get_a_book(book_id, session)
-        update_data_dict = book_update_data.model_dump()
-        
-        for k, v in update_data_dict.items():
-            setattr(book_to_update, k, v)
-        
-        await session.commit()
-        return book_to_update
+    async def update_book(self, book_uid:str, book_update_data:BookUpdateModel, session:AsyncSession):
+        book_to_update = await self.get_a_book(book_uid, session)
+        if book_to_update:
+            update_data_dict = book_update_data.model_dump()
             
-    def delete_book(self, book_id:str, session:AsyncSession):
-        book_to_delete = self.get_a_book(book_id, session)
+            for k, v in update_data_dict.items():
+                setattr(book_to_update, k, v)
+            
+            await session.commit()
+            return book_to_update
+        else:
+            return None
+            
+    async def delete_book(self, book_uid:str, session:AsyncSession):
+        book_to_delete = await self.get_a_book(book_uid, session)
         
-        await session.delete(book_to_delete)
-        await session.commit()
-        
-        return {}
-    
+        if book_to_delete is not None:
+            session.delete(book_to_delete)
+            await session.commit()
+            return {}
+        else :
+            return None

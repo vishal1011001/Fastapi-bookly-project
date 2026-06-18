@@ -42,7 +42,7 @@ class BookService:
         book_to_delete = await self.get_a_book(book_uid, session)
         
         if book_to_delete is not None:
-            session.delete(book_to_delete)
+            await session.delete(book_to_delete)
             await session.commit()
             return {}
         else :

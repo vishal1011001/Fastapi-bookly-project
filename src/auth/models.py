@@ -8,7 +8,7 @@ class User(SQLModel, table=True):
     
     uid : uuid.UUID = Field(
         sa_column = Column(
-            pg.uuid,
+            pg.UUID,
             nullable=False,
             primary_key=True,
             default=uuid.uuid4
@@ -19,7 +19,7 @@ class User(SQLModel, table=True):
     first_name: str
     last_name: str
     is_verified: bool = Field(sa_column=Column(pg.BOOLEAN, default=False))
-    password: str
+    password_hash: str = Field(exclude=True)
     created_at: datetime = Field(sa_column=Column(pg.TIMESTAMP, default=datetime.now))
     updated_at: datetime = Field(sa_column=Column(pg.TIMESTAMP, default=datetime.now))
     

@@ -6,6 +6,7 @@ passwd_context = CryptContext(
 
 def generate_passwd_hash(password: str) -> str:
     hash = passwd_context.hash(password)
+    
     return hash
 
 def verify_passwd(password: str, hash: str) -> bool:

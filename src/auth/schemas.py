@@ -21,3 +21,6 @@ class UserResponse(BaseModel):
     created_at: datetime 
     updated_at: datetime 
     
+class UserCredentials(BaseModel):
+    email: str = Field(max_length=100)
+    password: str = Field(min_length=8)

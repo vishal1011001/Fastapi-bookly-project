@@ -47,7 +47,7 @@ async def update_book(book_uid: str, book_update_data:BookUpdateModel, session: 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail='Book to be updated NOT FOUND.')
     
-
+# delete a book
 @book_router.delete('/{book_uid}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_book(book_uid: str, session: AsyncSession = Depends(get_session)):
     book_to_delete = await book_service.delete_book(book_uid, session)

@@ -1,6 +1,8 @@
 from fastapi.security import HTTPBearer
-from fastapi import Request
+from fastapi import Request, status
 from fastapi.security.http import HTTPAuthorizationCredentials
+from .utils import decode_token
+from fastapi.exceptions import HTTPException
 
 class AccessTokenBearer(HTTPBearer):
     def __init__(self, auto_error = True):
@@ -9,7 +11,18 @@ class AccessTokenBearer(HTTPBearer):
     async def __call__(self, request: Request) -> HTTPAuthorizationCredentials | None:
         creds = await super().__call__(request)
         
-        print(creds.scheme)
-        print(creds.credentials)
+        token = creds.credentials
+        token_data = decode_token(token)
         
+        if not self.token_valid:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="Invalid or expired token")
+        
+        if token_data
         return creds
+    
+    def token_valid(self, token: str) -> bool:
+        token_data = decode_token(token)
+        return True if token_data is not None else False
+    
+    

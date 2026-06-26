@@ -18,8 +18,8 @@ class AccessTokenBearer(HTTPBearer):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="Invalid or expired token")
         
-        if token_data
-        return creds
+        if token_data:
+            return creds
     
     def token_valid(self, token: str) -> bool:
         token_data = decode_token(token)

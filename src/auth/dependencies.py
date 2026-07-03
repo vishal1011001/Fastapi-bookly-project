@@ -3,8 +3,9 @@ from fastapi import Request, status
 from fastapi.security.http import HTTPAuthorizationCredentials
 from .utils import decode_token
 from fastapi.exceptions import HTTPException
+from src.db.redis import token_exists_in_blocklist
 
-class AccessTokenBearer(HTTPBearer):
+class TokenBearer(HTTPBearer):
     def __init__(self, auto_error = True):
         super().__init__(auto_error=auto_error)
         
@@ -14,15 +15,49 @@ class AccessTokenBearer(HTTPBearer):
         token = creds.credentials
         token_data = decode_token(token)
         
-        if not self.token_valid:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="Invalid or expired token")
+        if not self.token_valid(token):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={
+                        'error': "Token is invalid",
+                        'resolution': "Please get a new token"
+                    }
+            )
+            
+        if await token_exists_in_blocklist(token_data['jti']):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={
+                        'error': "Token is expired or revoked",
+                        'resolution': "Please get a new token"
+                    }
+            )
         
-        if token_data:
-            return creds
+        self.verify_token_data(token_data)
+        
+        return token_data
     
     def token_valid(self, token: str) -> bool:
         token_data = decode_token(token)
-        return True if token_data is not None else False
+        return token_data is not None
     
+    def verify_token_data(self, token_data):
+        raise NotImplementedError("Override this method in child classes.")
     
+class AccessTokenBearer(TokenBearer):
+    def verify_token_data(self, token_data: dict):
+        if token_data and token_data['refresh']:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Provide an access token."
+            )
+
+
+class RefreshTokenBearer(TokenBearer):
+    def verify_token_data(self, token_data: dict):
+        if token_data and not token_data['refresh']:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Provide an refresh token."
+            )
+            

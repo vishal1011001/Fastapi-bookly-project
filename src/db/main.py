@@ -1,4 +1,4 @@
-from sqlmodel import text, SQLModel
+from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.config import Config

@@ -1,7 +1,7 @@
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select, desc
 from src.books.schemas import BookModel, BookCreateModel, BookUpdateModel
-from src.books.models import Book
+from src.db.models import Book
 from datetime import datetime
 
 class BookService:

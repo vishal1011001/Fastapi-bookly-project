@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status
-from .schemas import UserCreateModel, UserResponse, UserCredentials
+from .schemas import UserCreateModel, UserResponse, UserCredentials, UserBookModel
 from .service import UserService
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi.exceptions import HTTPException
@@ -89,7 +89,7 @@ async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer(
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
                         detail="Invalid or expired token.")
     
-@auth_router.get('/me', response_model=UserResponse)
+@auth_router.get('/me', response_model=UserBookModel)
 async def get_current_user(
     user = Depends(get_current_user),
     _:bool = Depends(role_checker)

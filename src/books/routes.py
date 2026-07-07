@@ -17,7 +17,7 @@ role_checker = Depends(RoleChecker(['admin', 'user']))
 @book_router.get('/', dependencies=[role_checker])
 async def get_all_books(
     session: AsyncSession = Depends(get_session),
-    token_details=Depends(access_token_bearer)  
+    token_details: dict=Depends(access_token_bearer)  
 ):
     books = await book_service.get_all_books(session)
     return books
@@ -27,7 +27,7 @@ async def get_all_books(
 async def get_user_books(
     user_uid: str,
     session: AsyncSession = Depends(get_session),
-    token_details = Depends(access_token_bearer)
+    token_details: dict = Depends(access_token_bearer)
 ):
     books = await book_service.get_user_books(user_uid, session)
     return books
@@ -37,7 +37,7 @@ async def get_user_books(
 async def get_a_book(
     book_uid: str, 
     session: AsyncSession = Depends(get_session),  
-    token_details=Depends(access_token_bearer) 
+    token_details: dict=Depends(access_token_bearer) 
 ) -> dict:
     retrieved_book = await book_service.get_a_book(book_uid, session)
     
@@ -53,7 +53,7 @@ async def get_a_book(
 async def create_book(
     book_data: BookCreateModel, 
     session: AsyncSession = Depends(get_session),
-    token_details=Depends(access_token_bearer)
+    token_details: dict=Depends(access_token_bearer)
 ) -> dict:
     
     user_uid = token_details.get('user')['uid']
@@ -67,7 +67,7 @@ async def update_book(
     book_uid: str, 
     book_update_data:BookUpdateModel, 
     session: AsyncSession = Depends(get_session),
-    token_details=Depends(access_token_bearer)
+    token_details: dict=Depends(access_token_bearer)
 ):
     updated_book = await book_service.update_book(book_uid, book_update_data, session)
     
@@ -82,7 +82,7 @@ async def update_book(
 async def delete_book(
     book_uid: str, 
     session: AsyncSession = Depends(get_session),
-    token_details=Depends(access_token_bearer)
+    token_details: dict=Depends(access_token_bearer)
 ):
     book_to_delete = await book_service.delete_book(book_uid, session)
     

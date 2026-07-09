@@ -6,9 +6,11 @@ from src.db.main import get_session
 from fastapi import Depends
 from sqlmodel.ext.asyncio.session import AsyncSession
 from .service import ReviewService
+from src.auth.dependencies import AccessTokenBearer
 
 review_router = APIRouter()
 review_service = ReviewService()
+access_token_bearer = AccessTokenBearer()
 
 @review_router.post('/book/{book_uid}')
 async def add_review_to_book(
@@ -24,4 +26,13 @@ async def add_review_to_book(
     
     return new_review
     
-    
+
+@review_router.get('/{review_uid}')
+async def get_a_review(
+    review_uid:str,
+    token_details: dict = Depends(access_token_bearer),
+    session: AsyncSession = Depends(get_session)
+):
+    review = await review_service.get_review_by_uid(review_uid, session)
+    return review
+

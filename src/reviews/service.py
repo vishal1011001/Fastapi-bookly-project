@@ -5,6 +5,7 @@ from .schemas import ReviewCreateModel
 from fastapi.exceptions import HTTPException
 from fastapi import status
 from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlmodel import select
 
 book_service = BookService()
 user_service = UserService()
@@ -51,3 +52,14 @@ class ReviewService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Server error at package service level."
             )
+            
+    async def get_review_by_uid(self, review_uid: str, session: AsyncSession):
+        try:
+            statement = select(Review).where(Review.uid == review_uid)
+            review = await session.exec(statement)
+            return review.first()
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="Review with given uid not found")
+            
+        
